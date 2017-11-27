@@ -1,0 +1,4 @@
+csmai/controller/ApiController.class
+csmai/model/OcrResult.class
+csmai/service/ReadService.class
+csmai/Application.class

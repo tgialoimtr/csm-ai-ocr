@@ -1,0 +1,49 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<script src="/js/jquery-3.1.1.min.js"></script>
+<link href="/css/main.css" rel="stylesheet"/>
+<link href="/css/bootstrap.css" rel="stylesheet"/>
+<body class="container">
+
+    <h1>CSM-AI OCR Demo</h1>
+
+    <!-- <form action="/api/handleFileUploadTesseract" method="post" enctype="multipart/form-data">
+
+        <p>
+            Select a file : <input type="file" name="file" size="45" />
+        </p>
+
+        <input type="submit" value="TESSERACT" />
+    </form> -->
+
+    <form action="/ocr/read/" method="post" enctype="multipart/form-data" style="width: 500px; padding:10px; border: 1px solid green;">
+    <!-- form action="/ocr/read/" method="post" enctype="multipart/form-data" style="width: 500px; padding:10px; border: 1px solid green;" -->
+
+        <p>
+            Select files : <input type="file" name="file" size="45" multiple="multiple"/>
+        </p>
+        <input type="submit" value="OCR" />
+    </form>
+
+    <!-- <form action="/api/handleCleanImage" method="post" enctype="multipart/form-data">
+
+        <p>
+            Select a file : <input type="file" name="file" size="45" multiple="multiple"/>
+        </p>
+
+        <input type="submit" value="Clean" />
+    </form> -->
+
+    <!-- <form action="/api/createHtmlPageToCorrect" method="post" enctype="multipart/form-data">
+
+        <p>
+            Select list file to create Correction Page: <input type="file" name="file" size="45" multiple="multiple" />
+        </p>
+
+        <input type="submit" value="Create" />
+    </form> -->
+    
+    <!-- <form action="/api/genDataTraining" method="post">
+        <button class="list-correction-page" type="submit">Gen Data Training</button>
+    </form> -->
+</body>
+</html>
