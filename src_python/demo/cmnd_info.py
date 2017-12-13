@@ -14,6 +14,7 @@ from classify import lineest
 from ocrolib import psegutils,morph
 import ocrolib
 from numpy import where, linspace, uint8, ones, array
+from textutils import ocr
 
 # Compare location of main template and name template to see if they are at same location
 def validateTextRegion(img, ((startX, startY), (endX, endY)), ((startXName, startYName), (endXName, endYName))):
@@ -197,16 +198,15 @@ class CMND(object):
 #             print 'black text'
 #             cv2.imshow('line', binline)            
 #             cv2.waitKey(-1)
-            pilimg = Image.fromarray(binline)
+#             pilimg = Image.fromarray(binline)
             pos = l.bounds[0].stop
             # Prediction using Tesseract 4.0
             if pos > self.linepos1['id'][0] and pos < self.linepos1['id'][1]: #ID, all numbers
-                pred = pytesseract.image_to_string(pilimg,lang='eng', config='--oem 0 --psm 7 -c tessedit_char_whitelist=0123456789')
+                pred = ocr(binline, config='--oem 0 --psm 7 -c tessedit_char_whitelist=0123456789')
             elif pos > self.linepos1['dob'][0] and pos < self.linepos1['dob'][1]: # DOB, number, - , /
-                pred = pytesseract.image_to_string(pilimg,lang='eng', config='--oem 1 --psm 7 -c tessedit_char_whitelist=0123456789-/')
+                pred = ocr(binline, config='--oem 1 --psm 7 -c tessedit_char_whitelist=0123456789-/')
             else:
-                pred = pytesseract.image_to_string(pilimg,lang='vie', config='--oem 1 --psm 7')
-            print pred
+                pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
             pred = pred.replace(u'²','2').replace(u'º','o').replace(u'»','-')
             outputfile.write(pred + '\n')
         

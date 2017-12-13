@@ -16,6 +16,7 @@ from classify.common import estimate_skew_angle
 from numpy import linspace
 import codecs
 from passport import passport
+from multiprocessing import Pool
 
 
 # Calculate blurness of image using Laplacian operator
@@ -26,6 +27,8 @@ def calcBlur(img):
         temp = img
     return cv2.Laplacian(temp, cv2.CV_64F).var()
 
+def fff(c):
+    return c[0].findTextRegion(c[1]), c[0]
 
 if __name__ == '__main__':
 
@@ -43,8 +46,8 @@ if __name__ == '__main__':
 
     allcards = [cmnd12, cancuoc, cmnd9, pp, gplxmoi, gplxcu]
 #     allcards = [cmnd12, cancuoc, cmnd9]
-    
-    sys.argv = ['main.py','/home/loitg/Downloads/cmnd_data/passport/huuson.jpg','/home/loitg/temp.txt']
+    pool = Pool(processes=len(allcards)) 
+    sys.argv = ['main.py','/home/loitg/Downloads/cmnd_data/moi/05.jpg','/home/loitg/temp.txt']
     if len(sys.argv) < 3:
         sys.exit(1)
 
@@ -64,19 +67,25 @@ if __name__ == '__main__':
         # Rotate image to deskew
         img0 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img00 = cv2.resize(img0[h/3:,w/3:],None,fx=0.5,fy=0.5) # scale down to estimate skew faster
-        
-        cv2.imshow('forskew', img00)
-        cv2.waitKey(-1)
         angle = estimate_skew_angle(img00,linspace(-5,5,41))
         print 'angle ', angle
         rotM = cv2.getRotationMatrix2D((w/2,h/2),angle,1)
         img = cv2.warpAffine(img,rotM,(w,h))
     
         recognized_cards = []
-        for card in allcards:
-            # Check if img is this card or not, if yes, how confident it is
-            isCard, conf = card.findTextRegion(img)
+        
+        tt = time.time()
+#         for card in allcards:
+#             # Check if img is this card or not, if yes, how confident it is
+#             isCard, conf = card.findTextRegion(img)
+#             if isCard: recognized_cards.append((conf, card))
+#         print '1 ', time.time() -tt
+        
+        tt = time.time()
+        allcards = [(c,img) for c in allcards]
+        for (isCard, conf), card in pool.imap_unordered(fff, allcards):
             if isCard: recognized_cards.append((conf, card))
+        print '2 ', time.time() -tt
         
         if len(recognized_cards) > 0:
             # Pick the most appropriate card

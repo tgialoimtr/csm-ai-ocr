@@ -6,53 +6,12 @@ Created on Dec 12, 2017
 import cv2
 import sys
 import numpy as np
-import Image
-from pytesseract import pytesseract
-from scipy.misc import imsave
 from classify.common import sauvola, sharpen
 from time import time
 from posix import ttyname
 from text import MRZ
-from textutils import getFullDate, getGender, getNation
+from textutils import getFullDate, getGender, getNation, ocr
 from scipy.ndimage.filters import maximum_filter, minimum_filter
-
-def ocr(img, mrz_mode=True):
-    """Runs Tesseract on a given image. Writes an intermediate tempfile and then runs the tesseract command on the image.
-
-    This is a simplified modification of image_to_string from PyTesseract, which is adapted to SKImage rather than PIL.
-
-    In principle we could have reimplemented it just as well - there are some apparent bugs in PyTesseract (e.g. it
-    may lose the NamedTemporaryFile due to its auto-delete behaviour).
-
-    :param mrz_mode: when this is True (default) the tesseract is configured to recognize MRZs rather than arbitrary texts.
-    """
-    input_file_name = '%s.bmp' % pytesseract.tempnam()
-    output_file_name_base = '%s' % pytesseract.tempnam()
-    output_file_name = "%s.txt" % output_file_name_base
-    try:
-        imsave(input_file_name, img)
-
-        if mrz_mode:
-            config = "--psm 6 --oem 0 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789>< -c load_system_dawg=F -c load_freq_dawg=F"
-        else:
-            config = None
-
-        status, error_string = pytesseract.run_tesseract(input_file_name,
-                                             output_file_name_base,
-                                             lang=None,
-                                             boxes=False,
-                                             config=config)
-        if status:
-            errors = pytesseract.get_errors(error_string)
-            raise pytesseract.TesseractError(status, errors)
-        f = open(output_file_name)
-        try:
-            return f.read().strip()
-        finally:
-            f.close()
-    finally:
-        pytesseract.cleanup(input_file_name)
-        pytesseract.cleanup(output_file_name)
         
 class passport(object):
     def __init__(self):
@@ -113,8 +72,8 @@ class passport(object):
         thresh[:, image.shape[1] - p:] = 0
         thresh = minimum_filter(thresh, (10,10))
         thresh = maximum_filter(thresh, (10,10))
-        cv2.imshow('hihi', thresh)
-        cv2.waitKey(-1)
+#         cv2.imshow('hihi', thresh)
+#         cv2.waitKey(-1)
         
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
         cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
@@ -142,8 +101,8 @@ class passport(object):
                 # surrounding the MRZ
                 self.roi = image[y:y + h, x:x + w].copy()
 #                 print ar
-                cv2.imshow("ROI", self.roi)
-                cv2.waitKey(-1)
+#                 cv2.imshow("ROI", self.roi)
+#                 cv2.waitKey(-1)
 #                 cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 return True, 0
             
@@ -159,11 +118,11 @@ class passport(object):
         gray = sharpen(gray)
         gray = sauvola(gray, scaledown = 0.3, w=gray.shape[0]/3.0)*255
         
-        cv2.imshow('hihi', gray)
+#         cv2.imshow('hihi', gray)
         
-        pred = ocr(gray)
-        print pred
-        cv2.waitKey(-1)
+        pred = ocr(gray, "--psm 6 --oem 0 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789>< -c load_system_dawg=F -c load_freq_dawg=F")
+#         print pred
+#         cv2.waitKey(-1)
         rs = MRZ.from_ocr(pred)
         rs = rs.to_dict()
         pred = '-----------Passport------------\n'
