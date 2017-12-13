@@ -34,9 +34,6 @@ public class ReadService {
 			System.out.println(path);
 			System.out.println(pythonTempDir + filename + ".txt");
             ProcessBuilder builder = new ProcessBuilder(command);
-            Map<String, String> env = builder.environment();
-            // set environment variable u
-            env.put("PYTHONPATH", pythonCmnd);
             Process pr = builder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
             String line;
@@ -45,26 +42,29 @@ public class ReadService {
             }
             
             if (pr.waitFor() == 0) {
-            	rs.result = "Error";
             	System.out.println("Run sucess");
+        		InputStream fis = new FileInputStream(pythonTempDir + filename + ".txt");
+        		InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
+        		BufferedReader br = new BufferedReader(isr);
+        		StringBuilder sb = new StringBuilder();
+        		while ((line = br.readLine()) != null) {
+        			sb.append(line);
+        			sb.append(System.getProperty("line.separator"));
+        		}
+        		rs.result = sb.toString();
+        		if (rs.result == null || rs.result.equals("")) {
+        			rs.result = "Empty text";
+        		}
             } else {
-            	rs.result = "Error";
             	System.out.println("Run fail");
+            	rs.result = "Internal server error";
             }
             
-    		InputStream fis = new FileInputStream(pythonTempDir + filename + ".txt");
-    		InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
-    		BufferedReader br = new BufferedReader(isr);
-    		StringBuilder sb = new StringBuilder();
-    		while ((line = br.readLine()) != null) {
-    			sb.append(line);
-    			sb.append(System.getProperty("line.separator"));
-    		}
-    		rs.result = sb.toString();
+
     		
 		} catch (InterruptedException | IOException e) {
 			e.printStackTrace();
-			rs.result = "Error";
+			rs.result = "Internal server error";
 		}
 		
 

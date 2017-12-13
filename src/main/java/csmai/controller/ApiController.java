@@ -42,6 +42,7 @@ public class ApiController {
     public String handleCleanImage(@RequestParam("file") List<MultipartFile> files) {
         long start = System.currentTimeMillis();
         OcrResult rs = new OcrResult();
+        rs.result = "Internal server error";
         if (files.isEmpty()) {
             return "File is empty";
         }
@@ -56,6 +57,7 @@ public class ApiController {
             }
             
 		}
+		System.out.println(rs.result);
 		return rs.result;
     }
 }
