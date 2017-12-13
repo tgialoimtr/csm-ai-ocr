@@ -15,6 +15,7 @@ from cmnd_info import CMND
 from classify.common import estimate_skew_angle
 from numpy import linspace
 import codecs
+from passport import passport
 
 
 # Calculate blurness of image using Laplacian operator
@@ -34,15 +35,16 @@ if __name__ == '__main__':
     cancuoc.addLineDesc({'id':(40,64), 'dob':(122,137)})
     cmnd9 = CMND('CMND cu - 9 so', template_path + 'cmnd9_tmp.tiff', template_path + 'cmnd9_mask.tiff', template_path + 'cmnd9_tmpname.tiff')
     cmnd9.addLineDesc({'id':(40,64),'dob':(123,143)})
-#     gplxmoi = CMND('Giay Phep Lai Xe moi', template_path + 'gplxmoi_tmp.tiff', template_path + 'gplxmoi_mask.tiff', template_path + 'gplxmoi_tmpname.tiff')
-#     gplxmoi.addLineDesc({'id':(35,48), 'dob':(81,94)})
-#     gplxcu = CMND('Giay Phep Lai Xe cu', template_path + 'gplxcu_tmp.tiff', template_path + 'gplxcu_mask.tiff', template_path + 'gplxcu_tmpname.tiff')
-#     gplxcu.addLineDesc({'id':(0,0), 'dob':(0,0)})
+    gplxmoi = CMND('Giay Phep Lai Xe moi', template_path + 'gplxmoi_tmp.tiff', template_path + 'gplxmoi_mask.tiff', template_path + 'gplxmoi_tmpname.tiff')
+    gplxmoi.addLineDesc({'id':(35,48), 'dob':(81,94)})
+    gplxcu = CMND('Giay Phep Lai Xe cu', template_path + 'gplxcu_tmp.tiff', template_path + 'gplxcu_mask.tiff', template_path + 'gplxcu_tmpname.tiff')
+    gplxcu.addLineDesc({'id':(0,0), 'dob':(0,0)})
+    pp = passport()
 
-#     allcards = [cmnd12, cancuoc, cmnd9, gplxmoi, gplxcu]
-    allcards = [cmnd12, cancuoc, cmnd9]
+    allcards = [cmnd12, cancuoc, cmnd9, pp, gplxmoi, gplxcu]
+#     allcards = [cmnd12, cancuoc, cmnd9]
     
-#     sys.argv = ['main.py','/home/loitg/Downloads/cmnd_data/moi/00.JPG','/home/loitg/temp.txt']
+    sys.argv = ['main.py','/home/loitg/Downloads/cmnd_data/passport/huuson.jpg','/home/loitg/temp.txt']
     if len(sys.argv) < 3:
         sys.exit(1)
 
@@ -51,7 +53,7 @@ if __name__ == '__main__':
         if img is None:
             rstext.write('Input file is not an image.')
             sys.exit(0)
-        rr= 720.0/img.shape[1]
+        rr= 600.0/img.shape[1]
         img = cv2.resize(img, None, fx=rr, fy=rr)
         blurness = calcBlur(img)
         if blurness < 50:
@@ -62,7 +64,11 @@ if __name__ == '__main__':
         # Rotate image to deskew
         img0 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img00 = cv2.resize(img0[h/3:,w/3:],None,fx=0.5,fy=0.5) # scale down to estimate skew faster
-        angle = estimate_skew_angle(img00,linspace(-5,5,42))
+        
+        cv2.imshow('forskew', img00)
+        cv2.waitKey(-1)
+        angle = estimate_skew_angle(img00,linspace(-5,5,41))
+        print 'angle ', angle
         rotM = cv2.getRotationMatrix2D((w/2,h/2),angle,1)
         img = cv2.warpAffine(img,rotM,(w,h))
     
@@ -70,11 +76,11 @@ if __name__ == '__main__':
         for card in allcards:
             # Check if img is this card or not, if yes, how confident it is
             isCard, conf = card.findTextRegion(img)
-            if isCard: recognized_cards.append((card, conf))
+            if isCard: recognized_cards.append((conf, card))
         
         if len(recognized_cards) > 0:
             # Pick the most appropriate card
-            foundcmnd,_ = min(recognized_cards)
+            _, foundcmnd = min(recognized_cards)
             foundcmnd.printResult(rstext)
         else:
             rstext.write('No ID Card found.')            

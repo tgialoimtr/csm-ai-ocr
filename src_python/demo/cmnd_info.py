@@ -152,9 +152,15 @@ class CMND(object):
     # Extract lines from self.patch, then tesseract these lines
     def printResult(self, outputfile):
         # Some pre-process
+#         print 'text area before'
+#         cv2.imshow('patch', self.patch)
+#         cv2.waitKey(-1)
         patch = sharpen(self.patch)
         binary = sauvola(patch, w=int(self.template.shape[1]/24.5*2), k=0.33, scaledown=0.5, reverse=True)
         binary = cv2.bitwise_and(binary, binary, mask=self.patch_mask)
+#         print 'text area after'
+#         cv2.imshow('patch', binary*255)
+#         cv2.waitKey(-1)
         dotremoved = binary
         scale = self.scale
         # Line extraction copied  from Ocropus source code
@@ -180,8 +186,17 @@ class CMND(object):
             binline = binline.astype(float)
             le.measure(binline)
             binline = le.normalize(binline)
+#             print 'normalized'
+#             cv2.imshow('line', binline)
+#             cv2.waitKey(-1)
             binline = cv2.resize(binline, None, fx=2.0, fy=2.0)
+#             print 'resized'
+#             cv2.imshow('line', binline)
+#             cv2.waitKey(-1)
             binline = where(binline > 0.5, uint8(0), uint8(255)) # black text
+#             print 'black text'
+#             cv2.imshow('line', binline)            
+#             cv2.waitKey(-1)
             pilimg = Image.fromarray(binline)
             pos = l.bounds[0].stop
             # Prediction using Tesseract 4.0
@@ -191,7 +206,7 @@ class CMND(object):
                 pred = pytesseract.image_to_string(pilimg,lang='eng', config='--oem 1 --psm 7 -c tessedit_char_whitelist=0123456789-/')
             else:
                 pred = pytesseract.image_to_string(pilimg,lang='vie', config='--oem 1 --psm 7')
-            
+            print pred
             pred = pred.replace(u'²','2').replace(u'º','o').replace(u'»','-')
             outputfile.write(pred + '\n')
         
