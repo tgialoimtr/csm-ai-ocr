@@ -33,21 +33,21 @@ def fff(c):
 if __name__ == '__main__':
 
     cmnd12 = CMND('CMND moi - 12 so', template_path + 'cmnd12_tmp.tiff', template_path + 'cmnd12_mask.tiff', template_path + 'cmnd12_tmpname.tiff')
-    cmnd12.addLineDesc({'id':(40,64), 'dob':(147,160)})
+    cmnd12.addLineDesc({'idNumber':(40,64), 'dateOfBirth':(147,160), 'fullName':(70,115), 'Gender':(165,186), 'Dantoc':(165,186), 'NguyenQuan':(186,226)})
     cancuoc = CMND('Can Cuoc Cong Dan', template_path + 'cancuoc_tmp.tiff', template_path + 'cancuoc_mask.tiff', template_path + 'cancuoc_tmpname.tiff')
-    cancuoc.addLineDesc({'id':(40,64), 'dob':(122,137)})
+    cancuoc.addLineDesc({'idNumber':(40,64), 'dateOfBirth':(122,137), 'fullName':(70,120), 'Gender':(145,175), 'Dantoc':(145,175), 'NguyenQuan':(175,200)})
     cmnd9 = CMND('CMND cu - 9 so', template_path + 'cmnd9_tmp.tiff', template_path + 'cmnd9_mask.tiff', template_path + 'cmnd9_tmpname.tiff')
-    cmnd9.addLineDesc({'id':(40,64),'dob':(123,143)})
+    cmnd9.addLineDesc({'idNumber':(40,64),'dateOfBirth':(123,150), 'fullName':(70,125), 'Gender':(0,0), 'Dantoc':(145,175), 'NguyenQuan':(153,208)})
     gplxmoi = CMND('Giay Phep Lai Xe moi', template_path + 'gplxmoi_tmp.tiff', template_path + 'gplxmoi_mask.tiff', template_path + 'gplxmoi_tmpname.tiff')
-    gplxmoi.addLineDesc({'id':(35,48), 'dob':(81,94)})
+    gplxmoi.addLineDesc({'idNumber':(35,53), 'dateOfBirth':(81,94), 'fullName':(58,80), 'Gender':(0,0), 'Dantoc':(103,125), 'NguyenQuan':(0,0)})
     gplxcu = CMND('Giay Phep Lai Xe cu', template_path + 'gplxcu_tmp.tiff', template_path + 'gplxcu_mask.tiff', template_path + 'gplxcu_tmpname.tiff')
-    gplxcu.addLineDesc({'id':(0,0), 'dob':(0,0)})
+    gplxcu.addLineDesc({'idNumber':(0,0), 'dateOfBirth':(0,0), 'fullName':(0,0), 'Gender':(0,0), 'Dantoc':(0,0), 'NguyenQuan':(0,0)})
     pp = passport()
 
     allcards = [cmnd12, cancuoc, cmnd9, pp, gplxmoi, gplxcu]
 #     allcards = [cmnd12, cancuoc, cmnd9]
     pool = Pool(processes=len(allcards)) 
-    sys.argv = ['main.py','/home/loitg/Downloads/cmnd_data/moi/05.jpg','/home/loitg/temp.txt']
+#     sys.argv = ['main.py','/home/loitg/Downloads/cmnd_data/moi/05.jpg','/home/loitg/temp.txt']
     if len(sys.argv) < 3:
         sys.exit(1)
 

@@ -12,6 +12,7 @@ from posix import ttyname
 from text import MRZ
 from textutils import getFullDate, getGender, getNation, ocr
 from scipy.ndimage.filters import maximum_filter, minimum_filter
+import json
         
 class passport(object):
     def __init__(self):
@@ -125,6 +126,7 @@ class passport(object):
 #         cv2.waitKey(-1)
         rs = MRZ.from_ocr(pred)
         rs = rs.to_dict()
+        
         pred = '-----------Passport------------\n'
         if 'names' in rs: pred += 'Given Name: ' + rs['names'] + '\n'
         if 'surname' in rs: pred += 'Family Name: ' + rs['surname'] + '\n'
@@ -134,7 +136,18 @@ class passport(object):
         if 'country' in rs: pred += 'Issuing Country: ' + rs['country'] + ' - ' + getNation(rs['country']) + '\n'
         if 'number' in rs: pred += 'Number: ' + rs['number'] + ' (validity: ' + str(rs['valid_number']) + ')\n'
         if 'expiration_date' in rs: pred += 'Expiration Date: ' + getFullDate(rs['expiration_date']) + ' (validity: ' + str(rs['valid_expiration_date']) + ')\n'
-        outputfile.write(pred)
+
+        readrs = {}
+        readrs['type'] = 'Passport'
+        readrs['idNumber'] = rs['number'].replace('<','')
+        readrs['dateOfBirth'] = getFullDate(rs['date_of_birth']) if rs['valid_date_of_birth'] else None
+        readrs['Gender'] = getGender(rs['sex'])
+        readrs['Dantoc'] = getNation(rs['nationality'])
+        readrs['NguyenQuan'] = getNation(rs['country'])
+        readrs['fullName'] = rs['surname'] + ' ' + rs['names']
+        readrs['NgayHetHan'] = getFullDate(rs['expiration_date']) if rs['valid_expiration_date'] else None
+
+        outputfile.write(json.dumps(readrs))
     
     
     

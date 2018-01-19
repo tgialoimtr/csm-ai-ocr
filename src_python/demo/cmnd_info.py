@@ -15,6 +15,11 @@ from ocrolib import psegutils,morph
 import ocrolib
 from numpy import where, linspace, uint8, ones, array
 from textutils import ocr
+import json
+
+def unicode2ascii(text):
+    ret = ''.join(i for i in text if ord(i)<128)
+    return ret.encode('utf-8')
 
 # Compare location of main template and name template to see if they are at same location
 def validateTextRegion(img, ((startX, startY), (endX, endY)), ((startXName, startYName), (endXName, endYName))):
@@ -178,7 +183,8 @@ class CMND(object):
         binpage_reversed = 1 - dotremoved
         
         self.lines = []
-        outputfile.write('-----------' + self.name + '------------'  + '\n')
+        readrs = dict.fromkeys(self.linepos1.keys(),'')
+        lines = sorted(lines, key=lambda x: x.bounds[1].start)
         for i,l in enumerate(lines):
             # Line extraction copied from Ocropus source code
             binline = psegutils.extract_masked(binpage_reversed,l,pad=int(scale/2),expand=0) # black text
@@ -200,15 +206,38 @@ class CMND(object):
 #             cv2.waitKey(-1)
 #             pilimg = Image.fromarray(binline)
             pos = l.bounds[0].stop
+            left = (l.bounds[1].start < self.template.shape[1]/2)
             # Prediction using Tesseract 4.0
-            if pos > self.linepos1['id'][0] and pos < self.linepos1['id'][1]: #ID, all numbers
+            if pos > self.linepos1['idNumber'][0] and pos < self.linepos1['idNumber'][1]: #ID, all numbers
                 pred = ocr(binline, config='--oem 0 --psm 7 -c tessedit_char_whitelist=0123456789')
-            elif pos > self.linepos1['dob'][0] and pos < self.linepos1['dob'][1]: # DOB, number, - , /
+                readrs['idNumber'] += pred + ' '
+            elif pos > self.linepos1['dateOfBirth'][0] and pos < self.linepos1['dateOfBirth'][1]: # DOB, number, - , /
                 pred = ocr(binline, config='--oem 1 --psm 7 -c tessedit_char_whitelist=0123456789-/')
+                readrs['dateOfBirth'] += pred + ' '
+            elif left and pos > self.linepos1['Gender'][0] and pos < self.linepos1['Gender'][1]:
+                pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
+                readrs['Gender'] += pred + ' '
+            elif (not left) and pos > self.linepos1['Dantoc'][0] and pos < self.linepos1['Dantoc'][1]:
+                pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
+                readrs['Dantoc'] += pred + ' '
+            elif pos > self.linepos1['NguyenQuan'][0] and pos < self.linepos1['NguyenQuan'][1]:
+                pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
+                readrs['NguyenQuan'] += pred + ' '
+            elif pos > self.linepos1['fullName'][0] and pos < self.linepos1['fullName'][1]:
+                pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
+                readrs['fullName'] += pred + ' '
             else:
                 pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
-            pred = pred.replace(u'²','2').replace(u'º','o').replace(u'»','-')
-            outputfile.write(pred + '\n')
+                print 'unknown ', unicode2ascii(pred)               
+            
+        for k in readrs:
+            readrs[k] = (readrs[k].replace(u'²','2').replace(u'º','o').replace(u'»','-')).strip()
+            if len(readrs[k]) == 0:
+                readrs[k] = None
+        readrs['type'] = self.name
+        readrs['NgayHetHan'] = None
+
+        outputfile.write(json.dumps(readrs))
         
         
         
