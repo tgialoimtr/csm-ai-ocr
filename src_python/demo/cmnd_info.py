@@ -17,9 +17,9 @@ from numpy import where, linspace, uint8, ones, array
 from textutils import ocr
 import json
 
-def unicode2ascii(text):
-    ret = ''.join(i for i in text if ord(i)<128)
-    return ret.encode('utf-8')
+# def unicode2ascii(text):
+#     ret = ''.join(i for i in text if ord(i)<128)
+#     return ret.encode('utf-8')
 
 # Compare location of main template and name template to see if they are at same location
 def validateTextRegion(img, ((startX, startY), (endX, endY)), ((startXName, startYName), (endXName, endYName))):
@@ -226,9 +226,9 @@ class CMND(object):
             elif pos > self.linepos1['fullName'][0] and pos < self.linepos1['fullName'][1]:
                 pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
                 readrs['fullName'] += pred + ' '
-            else:
-                pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
-                print 'unknown ', unicode2ascii(pred)               
+#             else:
+#                 pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
+#                 print 'unknown ', unicode2ascii(pred), 'y:', l.bounds[0], 'x:', l.bounds[1]          
             
         for k in readrs:
             readrs[k] = (readrs[k].replace(u'²','2').replace(u'º','o').replace(u'»','-')).strip()

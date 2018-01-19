@@ -127,15 +127,15 @@ class passport(object):
         rs = MRZ.from_ocr(pred)
         rs = rs.to_dict()
         
-        pred = '-----------Passport------------\n'
-        if 'names' in rs: pred += 'Given Name: ' + rs['names'] + '\n'
-        if 'surname' in rs: pred += 'Family Name: ' + rs['surname'] + '\n'
-        if 'nationality' in rs: pred += 'Nationality: ' + rs['nationality'] + ' - ' + getNation(rs['nationality']) + '\n'
-        if 'date_of_birth' in rs: pred += 'Date of Birth: ' + getFullDate(rs['date_of_birth']) + ' (validity: ' + str(rs['valid_date_of_birth']) + ')\n'
-        if 'sex' in rs: pred += 'Gender: ' + getGender(rs['sex'])+ '\n'
-        if 'country' in rs: pred += 'Issuing Country: ' + rs['country'] + ' - ' + getNation(rs['country']) + '\n'
-        if 'number' in rs: pred += 'Number: ' + rs['number'] + ' (validity: ' + str(rs['valid_number']) + ')\n'
-        if 'expiration_date' in rs: pred += 'Expiration Date: ' + getFullDate(rs['expiration_date']) + ' (validity: ' + str(rs['valid_expiration_date']) + ')\n'
+#         pred = '-----------Passport------------\n'
+#         if 'names' in rs: pred += 'Given Name: ' + rs['names'] + '\n'
+#         if 'surname' in rs: pred += 'Family Name: ' + rs['surname'] + '\n'
+#         if 'nationality' in rs: pred += 'Nationality: ' + rs['nationality'] + ' - ' + getNation(rs['nationality']) + '\n'
+#         if 'date_of_birth' in rs: pred += 'Date of Birth: ' + getFullDate(rs['date_of_birth']) + ' (validity: ' + str(rs['valid_date_of_birth']) + ')\n'
+#         if 'sex' in rs: pred += 'Gender: ' + getGender(rs['sex'])+ '\n'
+#         if 'country' in rs: pred += 'Issuing Country: ' + rs['country'] + ' - ' + getNation(rs['country']) + '\n'
+#         if 'number' in rs: pred += 'Number: ' + rs['number'] + ' (validity: ' + str(rs['valid_number']) + ')\n'
+#         if 'expiration_date' in rs: pred += 'Expiration Date: ' + getFullDate(rs['expiration_date']) + ' (validity: ' + str(rs['valid_expiration_date']) + ')\n'
 
         readrs = {}
         readrs['type'] = 'Passport'
