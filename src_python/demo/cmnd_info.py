@@ -4,7 +4,7 @@ Created on Nov 2, 2017
 
 @author: loitg
 '''
-import Image
+from PIL import Image
 import pytesseract
 import cv2,os
 from classify.common import sauvola, sharpen, simplefirstAnalyse, ASHOW, summarize
@@ -16,7 +16,10 @@ import ocrolib
 from numpy import where, linspace, uint8, ones, array
 from textutils import ocr
 import json
+import sys  
 
+reload(sys)  
+sys.setdefaultencoding('utf8')
 # def unicode2ascii(text):
 #     ret = ''.join(i for i in text if ord(i)<128)
 #     return ret.encode('utf-8')
@@ -161,8 +164,12 @@ class CMND(object):
 #         print 'text area before'
 #         cv2.imshow('patch', self.patch)
 #         cv2.waitKey(-1)
+        if self.name == 'CMND cu - 9 so':
+            k = 0.45
+        else:
+            k = 0.33
         patch = sharpen(self.patch)
-        binary = sauvola(patch, w=int(self.template.shape[1]/24.5*2), k=0.33, scaledown=0.5, reverse=True)
+        binary = sauvola(patch, w=int(self.template.shape[1]/24.5*2), k=k, scaledown=0.5, reverse=True)
         binary = cv2.bitwise_and(binary, binary, mask=self.patch_mask)
 #         print 'text area after'
 #         cv2.imshow('patch', binary*255)
@@ -183,7 +190,7 @@ class CMND(object):
         binpage_reversed = 1 - dotremoved
         
         self.lines = []
-        readrs = dict.fromkeys(self.linepos1.keys(),'')
+        readrs = dict.fromkeys(self.linepos1.keys(),u'')
         lines = sorted(lines, key=lambda x: x.bounds[1].start)
         for i,l in enumerate(lines):
             # Line extraction copied from Ocropus source code
@@ -210,31 +217,37 @@ class CMND(object):
             # Prediction using Tesseract 4.0
             if pos > self.linepos1['idNumber'][0] and pos < self.linepos1['idNumber'][1]: #ID, all numbers
                 pred = ocr(binline, config='--oem 0 --psm 7 -c tessedit_char_whitelist=0123456789')
-                readrs['idNumber'] += pred + ' '
+                readrs['idNumber'] += pred + u' '
             elif pos > self.linepos1['dateOfBirth'][0] and pos < self.linepos1['dateOfBirth'][1]: # DOB, number, - , /
                 pred = ocr(binline, config='--oem 1 --psm 7 -c tessedit_char_whitelist=0123456789-/')
-                readrs['dateOfBirth'] += pred + ' '
+                readrs['dateOfBirth'] += pred + u' '
             elif left and pos > self.linepos1['Gender'][0] and pos < self.linepos1['Gender'][1]:
                 pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
-                readrs['Gender'] += pred + ' '
+                readrs['Gender'] += pred + u' '
             elif (not left) and pos > self.linepos1['Dantoc'][0] and pos < self.linepos1['Dantoc'][1]:
                 pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
-                readrs['Dantoc'] += pred + ' '
+                readrs['Dantoc'] += pred + u' '
             elif pos > self.linepos1['NguyenQuan'][0] and pos < self.linepos1['NguyenQuan'][1]:
                 pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
-                readrs['NguyenQuan'] += pred + ' '
+                readrs['NguyenQuan'] += pred + u' '
             elif pos > self.linepos1['fullName'][0] and pos < self.linepos1['fullName'][1]:
                 pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
-                readrs['fullName'] += pred + ' '
+                readrs['fullName'] += pred + u' '
 #             else:
 #                 pred = ocr(binline, config='--oem 1 --psm 7 -l vie')
 #                 print 'unknown ', unicode2ascii(pred), 'y:', l.bounds[0], 'x:', l.bounds[1]          
             
         for k in readrs:
-            readrs[k] = (readrs[k].replace(u'²','2').replace(u'º','o').replace(u'»','-')).strip()
+            readrs[k] = (readrs[k].replace(u'²',u'2').replace(u'º',u'o').replace(u'»',u'-')).strip()
             if len(readrs[k]) == 0:
                 readrs[k] = None
-        readrs['type'] = self.name
+        if self.name == 'CMND moi - 12 so':
+            readrs['type'] = 'CMND Mới - 12 Số'
+        elif self.name == 'Can Cuoc Cong Dan':
+            readrs['type'] = 'Căn Cước Công Dân'
+        elif self.name == 'CMND cu - 9 so':
+            readrs['type'] = 'CMND Cũ - 9 Số'
+
         readrs['NgayHetHan'] = None
 
         outputfile.write(json.dumps(readrs))

@@ -22,7 +22,7 @@ import copy,re
 from ocrolib import psegutils,morph,sl
 from ocrolib.toplevel import *
 
-import Image
+from PIL import Image
 import pytesseract
 from common import summarize
 import lineest
